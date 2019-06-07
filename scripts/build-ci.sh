@@ -4,6 +4,7 @@
 
 # Get the parent directory of where this script is.
 
+VERSION=0.2.0
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"
@@ -18,7 +19,7 @@ XC_OS=${XC_OS:-linux darwin windows}
 gox \
 	    -os="${XC_OS}" \
 	        -arch="${XC_ARCH}" \
-		    -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}" \
+		    -output "dist/{{.OS}}_{{.Arch}}_{{.Dir}}_v${VERSION}" \
 		        ./...
 
 # Done!
@@ -34,4 +35,3 @@ elif command -v shasum >/dev/null 2>&1 ; then
 else
     echo "Neither sha256sum nor shasum available, abandoned checksum generation"
 fi
-
