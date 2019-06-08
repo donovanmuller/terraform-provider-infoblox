@@ -1,0 +1,16 @@
+{
+    "name": "Go",
+    "dockerFile": "Dockerfile",
+    "extensions": [
+        "ms-vscode.go"
+    ],
+    "runArgs": [
+        "--cap-add=SYS_PTRACE",
+        "--security-opt",
+        "seccomp=unconfined"
+    ],
+    "settings": {
+        "go.gopath": "/go"
+    },
+    "postCreateCommand": "go get github.com/mitchellh/gox && go get"
+}

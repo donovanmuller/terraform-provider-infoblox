@@ -8,6 +8,7 @@ bin/
 modules-dev/
 pkg/
 vendor/*/
+dist/
 website/.vagrant
 website/build
 website/node_modules
