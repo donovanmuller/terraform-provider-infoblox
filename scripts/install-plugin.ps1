@@ -12,8 +12,8 @@ if ($IsWindows) {
 else {
     $os = if ($IsMacOs) { 'darwin' } else { 'linux' }
     $ext = ''
-    $pluginPath = Join-Path $env:HOME '.terraform/plugins'
-    $pluginDest = Join-Path $pluginPath "$($os)_$($arch)_terraform-provider-infoblox_v$($version)$($ext)"
+    $pluginPath = Join-Path $env:HOME ".terraform.d/plugins/$($os)_$($arch)"
+    $pluginDest = Join-Path $pluginPath "terraform-provider-infoblox_v$($version)$($ext)"
 }
 $pluginSource = Join-Path './dist' "$($os)_$($arch)_terraform-provider-infoblox_v$($version)$($ext)"
 
