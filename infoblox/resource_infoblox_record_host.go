@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/url"
 
-	infoblox "github.com/fanatic/go-infoblox"
+	infoblox "github.com/mschilz/go-infoblox"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -27,7 +27,7 @@ func hostIPv4Schema() map[string]*schema.Schema {
 	}
 }
 
-// hostIPv6Schema represents the schema for the host IPv4 sub-resource
+// hostIPv6Schema represents the schema for the host IPv6 sub-resource
 func hostIPv6Schema() map[string]*schema.Schema {
 	return map[string]*schema.Schema{
 		"address": {
@@ -59,9 +59,27 @@ func infobloxRecordHost() *schema.Resource {
 				ForceNew: true,
 			},
 			"ipv4addr": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:          schema.TypeList,
+				Optional:      true,
+				Computed:      true,
+				Elem:          &schema.Resource{Schema: hostIPv4Schema()},
+				ConflictsWith: []string{"ipv4cidr"},
+			},
+			"ipv4cidr": &schema.Schema{
+				Type:     schema.TypeString,
 				Optional: true,
-				Elem:     &schema.Resource{Schema: hostIPv4Schema()},
+				ForceNew: true,
+			},
+			"aliases": &schema.Schema{
+				Type:     schema.TypeSet,
+				Optional: true,
+                                //Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"exclude": &schema.Schema{
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+				Optional: true,
 			},
 			"ipv6addr": &schema.Schema{
 				Type:     schema.TypeList,
@@ -76,11 +94,12 @@ func infobloxRecordHost() *schema.Resource {
 			"comment": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-				Default:  "",
+                                //Computed: true,
 			},
 			"ttl": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  0,
 			},
 			"view": &schema.Schema{
 				Type:     schema.TypeString,
@@ -89,6 +108,17 @@ func infobloxRecordHost() *schema.Resource {
 			},
 		},
 	}
+}
+
+func aliasesFromlist(userAliases *schema.Set) []string {
+	result := []string{}
+
+	aliases := userAliases.List()
+	for _, alias := range aliases {
+		result = append(result, alias.(string))
+	}
+
+	return result
 }
 
 func ipv4sFromList(ipv4s []interface{}) []infoblox.HostIpv4Addr {
@@ -138,13 +168,20 @@ func hostObjectFromAttributes(d *schema.ResourceData) infoblox.RecordHostObject 
 	if attr, ok := d.GetOk("name"); ok {
 		hostObject.Name = attr.(string)
 	}
+	if attr, ok := d.GetOk("aliases"); ok {
+		hostObject.Aliases = aliasesFromlist(attr.(*schema.Set))
+        } else {
+                hostObject.Aliases = []string{}
+        }
 	if attr, ok := d.GetOk("configure_for_dns"); ok {
 		hostObject.ConfigureForDNS = attr.(bool)
 	}
 	if attr, ok := d.GetOk("comment"); ok {
 		hostObject.Comment = attr.(string)
-	}
-	if attr, ok := d.GetOk("ttl"); ok {
+	} else {
+                hostObject.Comment = ""
+        }
+	if attr, ok := d.GetOkExists("ttl"); ok {
 		hostObject.Ttl = attr.(int)
 	}
 	if attr, ok := d.GetOk("view"); ok {
@@ -156,11 +193,30 @@ func hostObjectFromAttributes(d *schema.ResourceData) infoblox.RecordHostObject 
 	if attr, ok := d.GetOk("ipv6addr"); ok {
 		hostObject.Ipv6Addrs = ipv6sFromList(attr.([]interface{}))
 	}
+	if attr, ok := d.GetOk("ipv4cidr"); ok {
+		//	excludedAddresses := buildExcludedAddressesArray(d)
+		//	ipv4addr, err = getNextAvailableIPFromCIDR(client, ipv4cidr.(string), excludedAddresses)
+		//	if err != nil {
+		//		return err
+		//	}
+		var ipv4addrs []infoblox.HostIpv4Addr
+		i := infoblox.HostIpv4Addr{}
+		i.Ipv4Addr = "func:nextavailableip:" + attr.(string)
+		hostObject.Ipv4Addrs = append(ipv4addrs, i)
+	}
 
 	return hostObject
 }
 
 func resourceInfobloxHostRecordCreate(d *schema.ResourceData, meta interface{}) error {
+	if err := validateIPv4Data(d); err != nil {
+		return err
+	}
+
+	var (
+		err error
+	)
+
 	client := meta.(*infoblox.Client)
 
 	record := url.Values{}
@@ -168,7 +224,7 @@ func resourceInfobloxHostRecordCreate(d *schema.ResourceData, meta interface{}) 
 
 	log.Printf("[DEBUG] Creating Infoblox Host record with configuration: %#v", hostObject)
 	opts := &infoblox.Options{
-		ReturnFields: []string{"name", "ipv4addr", "ipv6addr", "configure_for_dns", "comment", "ttl", "view"},
+		ReturnFields: []string{"name", "aliases", "ipv4addr", "ipv6addr", "configure_for_dns", "comment", "ttl", "view"},
 	}
 	recordID, err := client.RecordHost().Create(record, opts, hostObject)
 	if err != nil {
@@ -185,14 +241,20 @@ func resourceInfobloxHostRecordRead(d *schema.ResourceData, meta interface{}) er
 	client := meta.(*infoblox.Client)
 
 	opts := &infoblox.Options{
-		ReturnFields: []string{"name", "ipv4addrs", "ipv6addrs", "configure_for_dns", "comment", "ttl", "view"},
+		ReturnFields: []string{"name", "aliases", "ipv4addrs", "ipv6addrs", "configure_for_dns", "comment", "ttl", "view"},
 	}
 	record, err := client.GetRecordHost(d.Id(), opts)
 	if err != nil {
 		return handleReadError(d, "Host", err)
 	}
 
+	log.Printf("[DEBUG] Infoblox record: %#v", record)
+
 	d.Set("name", record.Name)
+
+	if &record.Aliases != nil {
+		d.Set("aliases", record.Aliases)
+	}
 
 	if &record.ConfigureForDNS != nil {
 		d.Set("configure_for_dns", record.ConfigureForDNS)
@@ -229,8 +291,10 @@ func resourceInfobloxHostRecordRead(d *schema.ResourceData, meta interface{}) er
 			result = append(result, i)
 		}
 
+		log.Printf("[DEBUG] RESULT: %#v", result)
 		d.Set("ipv4addr", result)
 	}
+
 	if &record.Ipv6Addrs != nil {
 		var result []interface{}
 
@@ -257,7 +321,7 @@ func resourceInfobloxHostRecordUpdate(d *schema.ResourceData, meta interface{}) 
 	client := meta.(*infoblox.Client)
 
 	opts := &infoblox.Options{
-		ReturnFields: []string{"name", "ipv4addrs", "ipv6addrs", "configure_for_dns", "comment", "ttl", "view"},
+		ReturnFields: []string{"name", "aliases", "ipv4addrs", "ipv6addrs", "configure_for_dns", "comment", "ttl", "view"},
 	}
 	_, err := client.GetRecordHost(d.Id(), opts)
 	if err != nil {
