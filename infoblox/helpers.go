@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/fanatic/go-infoblox"
+	"github.com/mschilz/go-infoblox"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -91,6 +91,17 @@ func validateIPData(d *schema.ResourceData) error {
 	if !cidrOk && !ipRangeOk {
 		return fmt.Errorf(
 			"One of ['cidr', 'ip_range'] must be set to create an Infoblox IP")
+	}
+	return nil
+}
+
+// Validates that either 'ipv4cidr' or 'ipv4addr' terraform argument is set.
+func validateIPv4Data(d *schema.ResourceData) error {
+	_, ipv4cidrOk := d.GetOk("ipv4cidr")
+	_, ipv4addrOk := d.GetOk("ipv4addr")
+	if !ipv4cidrOk && !ipv4addrOk {
+		return fmt.Errorf(
+			"One of ['ipv4cidr', 'ipv4addr'] must be set to create an Infoblox host object with next available IP")
 	}
 	return nil
 }

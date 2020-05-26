@@ -2,7 +2,8 @@
 
 XC_OS=$(go env GOOS)
 XC_ARCH=$(go env GOARCH)
-DEST_BIN=terraform-provider-infoblox
+VERSION=0.2.0
+DEST_BIN=terraform-provider-infoblox_v${VERSION}
 
 echo "Compiling for OS: $XC_OS and ARCH: $XC_ARCH"
 
@@ -13,17 +14,8 @@ if [ $? != 0 ] ; then
     exit 1
 fi
 
-echo "Looking for Terraform install"
-
-TERRAFORM=$(which terraform)
-
-[ $TERRAFORM ] && TERRAFORM_LOC=$(dirname ${TERRAFORM})
-
-if [ $TERRAFORM_LOC  ] ; then
-    DEST_PATH=$TERRAFORM_LOC
-else
-    DEST_PATH=$GOPATH/bin
-fi
+DEST_PATH=~/.terraform/${XC_OS}_${XC_ARCH}
+mkdir -p $DEST_PATH
 
 echo ""
 echo "Moving terraform-provider-infoblox_${XC_OS}_${XC_ARCH} to $DEST_PATH/$DEST_BIN"
