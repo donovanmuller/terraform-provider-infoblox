@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/url"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	infoblox "github.com/mschilz/go-infoblox"
-	"github.com/hashicorp/terraform/helper/schema"
 )
 
 // hostIPv4Schema represents the schema for the host IPv4 sub-resource
@@ -73,8 +73,8 @@ func infobloxRecordHost() *schema.Resource {
 			"aliases": &schema.Schema{
 				Type:     schema.TypeSet,
 				Optional: true,
-                                //Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				//Computed: true,
+				Elem: &schema.Schema{Type: schema.TypeString},
 			},
 			"exclude": &schema.Schema{
 				Type:     schema.TypeSet,
@@ -94,7 +94,7 @@ func infobloxRecordHost() *schema.Resource {
 			"comment": &schema.Schema{
 				Type:     schema.TypeString,
 				Optional: true,
-                                //Computed: true,
+				//Computed: true,
 			},
 			"ttl": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -170,17 +170,17 @@ func hostObjectFromAttributes(d *schema.ResourceData) infoblox.RecordHostObject 
 	}
 	if attr, ok := d.GetOk("aliases"); ok {
 		hostObject.Aliases = aliasesFromlist(attr.(*schema.Set))
-        } else {
-                hostObject.Aliases = []string{}
-        }
+	} else {
+		hostObject.Aliases = []string{}
+	}
 	if attr, ok := d.GetOk("configure_for_dns"); ok {
 		hostObject.ConfigureForDNS = attr.(bool)
 	}
 	if attr, ok := d.GetOk("comment"); ok {
 		hostObject.Comment = attr.(string)
 	} else {
-                hostObject.Comment = ""
-        }
+		hostObject.Comment = ""
+	}
 	if attr, ok := d.GetOkExists("ttl"); ok {
 		hostObject.Ttl = attr.(int)
 	}

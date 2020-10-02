@@ -1,7 +1,8 @@
-module github.com/mschilz/terraform-provider-infoblox
+module github.com/donovanmuller/terraform-provider-infoblox
+
+go 1.14
 
 require (
-	github.com/fanatic/go-infoblox v0.0.0-20190709161059-e25f3820238c
-	github.com/hashicorp/terraform v0.12.10
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.0.3
 	github.com/mschilz/go-infoblox v0.0.0-20191014111000-482ee399be75
 )

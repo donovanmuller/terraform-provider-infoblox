@@ -49,8 +49,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mschilz/go-infoblox"
-	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func resourceInfobloxIP() *schema.Resource {

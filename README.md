@@ -1,15 +1,12 @@
 # [Terraform](https://github.com/hashicorp/terraform) Infoblox Provider
 
-[![Build
-status](https://travis-ci.org/prudhvitella/terraform-provider-infoblox.svg)](https://travis-ci.org/prudhvitella/terraform-provider-infoblox)
-
 The Infoblox provider is used to interact with the
 resources supported by Infoblox. The provider needs to be configured
 with the proper credentials before it can be used.
 
 ## Download
 
-Download builds for Darwin, Linux and Windows from the [releases page](https://github.com/prudhvitella/terraform-provider-infoblox/releases/).
+Download builds for Darwin, Linux and Windows from the [releases page](https://github.com/donovanmuller/terraform-provider-infoblox/releases/).
 
 ## Example Usage
 

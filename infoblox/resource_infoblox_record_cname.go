@@ -5,8 +5,8 @@ import (
 	"log"
 	"net/url"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	infoblox "github.com/mschilz/go-infoblox"
-	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func infobloxRecordCNAME() *schema.Resource {

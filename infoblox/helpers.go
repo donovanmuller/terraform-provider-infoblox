@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mschilz/go-infoblox"
-	"github.com/hashicorp/terraform/helper/schema"
 )
 
 // The comment, ttl, and, view attributes are common across all of the DNS

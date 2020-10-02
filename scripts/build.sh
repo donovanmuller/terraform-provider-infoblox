@@ -2,7 +2,7 @@
 
 XC_OS=$(go env GOOS)
 XC_ARCH=$(go env GOARCH)
-VERSION=0.2.0
+VERSION=0.3.0
 DEST_BIN=terraform-provider-infoblox_v${VERSION}
 
 echo "Compiling for OS: $XC_OS and ARCH: $XC_ARCH"

@@ -4,7 +4,7 @@
 
 # Get the parent directory of where this script is.
 
-VERSION=0.2.0
+VERSION=0.3.0
 SOURCE="${BASH_SOURCE[0]}"
 while [ -h "$SOURCE" ] ; do SOURCE="$(readlink "$SOURCE")"; done
 DIR="$( cd -P "$( dirname "$SOURCE" )/.." && pwd )"

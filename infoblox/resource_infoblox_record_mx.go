@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	infoblox "github.com/mschilz/go-infoblox"
-	"github.com/hashicorp/terraform/helper/schema"
 )
 
 func infobloxRecordMX() *schema.Resource {
